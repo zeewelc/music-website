@@ -1,2 +1,16 @@
 <h1>Welcome to {{ title }}!</h1>
 <p>This is the root component of your music website.</p>
+
+<nav class="navbar">
+  <div class="logo">🎵 Music Website</div>
+  <button class="menu-toggle" (click)="toggleMenu()">☰</button>
+  <div class="nav-links" [class.active]="menuOpen">
+    <a routerLink="/songs" routerLinkActive="active">Songs</a>
+    <a routerLink="/comments" routerLinkActive="active">Comments</a>
+    <a routerLink="/gallery" routerLinkActive="active">Gallery</a>
+    <a routerLink="/contact" routerLinkActive="active">Contact</a>
+    <a routerLink="/rating" routerLinkActive="active">Rating</a>
+  </div>
+</nav>
+
+<router-outlet></router-outlet>
