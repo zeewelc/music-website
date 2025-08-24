@@ -4,8 +4,13 @@ export default function showsRouter(db) {
   const router = express.Router();
 
   router.get('/', async (req, res) => {
-    const shows = await db.all('SELECT * FROM shows');
-    res.json(shows);
+    try {
+      const shows = await db.all('SELECT * FROM shows');
+      res.json(shows);
+    } catch (err) {
+      console.error('Error fetching shows:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   return router;
