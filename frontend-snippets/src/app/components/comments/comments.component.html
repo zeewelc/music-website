@@ -1,0 +1,29 @@
+<!-- New Comment Form -->
+<form (ngSubmit)="addNewComment()" class="comment-form">
+  <input
+    type="text"
+    [(ngModel)]="newComment.name"
+    name="name"
+    placeholder="Your name"
+    required
+  />
+  <textarea
+    [(ngModel)]="newComment.text"
+    name="text"
+    placeholder="Your comment"
+    required
+  ></textarea>
+  <button type="submit">Add Comment</button>
+</form>
+
+<!-- Comment List -->
+<div *ngIf="comments.length > 0; else noComments">
+  <div *ngFor="let comment of comments" class="comment-box">
+    <p><strong>{{ comment.name }}</strong>: {{ comment.text }}</p>
+    <button (click)="deleteComment(comment.id)">Delete</button>
+  </div>
+</div>
+
+<ng-template #noComments>
+  <p>No comments available.</p>
+</ng-template>

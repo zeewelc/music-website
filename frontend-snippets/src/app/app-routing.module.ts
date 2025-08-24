@@ -13,6 +13,7 @@ const routes: Routes = [
   { path: 'gallery', component: GalleryComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'rating', component: RatingComponent },
+  { path: 'comments', component: CommentsComponent },
   { path: '', redirectTo: '/songs', pathMatch: 'full' }
 ];
 
