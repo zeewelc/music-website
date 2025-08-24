@@ -10,7 +10,9 @@ export interface Merch { id:number; name:string; price_cents:number; image_url?:
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private base = '/api';
+
+  private base = 'http://localhost:3000/api';
+
   getReleases(): Observable<Release[]> { return this.http.get<Release[]>(`${this.base}/releases`); }
   getFeaturedRelease(): Observable<Release[]> { return this.http.get<Release[]>(`${this.base}/releases/featured`); }
   getUpcomingShows(): Observable<Show[]> { return this.http.get<Show[]>(`${this.base}/shows/upcoming`); }
