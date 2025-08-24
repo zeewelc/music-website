@@ -31,10 +31,14 @@ const start = async () => {
     await db.exec(seed);
   }
 
-  app.get('/api/health', (req,res)=> res.json({ ok: true }));
+
+  app.get('/api/health', (req, res) => res.json({ ok: true }));
+
 
   app.use('/api/releases', releasesRouter(db));
+
   app.use('./api/shows', showsRouter(db));
+
   app.use('/api/merch', merchRouter(db));
 
   const port = process.env.PORT || 3000;
