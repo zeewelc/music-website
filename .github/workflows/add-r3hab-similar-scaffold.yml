@@ -1,0 +1,430 @@
+name: Add R3HAB-similar scaffold (API + Angular snippets)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create scaffold files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p backend/routes backend/middleware backend/data \
+                   frontend-snippets/app/features/music \
+                   frontend-snippets/app/features/tour \
+                   frontend-snippets/app/core/services \
+                   frontend-snippets/styles
+
+          #############
+          # Backend
+          #############
+
+          cat > backend/package.json <<'EOF'
+          {
+            "name": "zw-music-backend",
+            "version": "0.1.0",
+            "type": "module",
+            "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
+            "dependencies": {
+              "cors": "^2.8.5",
+              "dotenv": "^16.4.5",
+              "express": "^4.19.2",
+              "helmet": "^7.1.0",
+              "sqlite": "^5.1.6",
+              "sqlite3": "^5.1.7",
+              "express-rate-limit": "^7.4.0"
+            }
+          }
+          EOF
+
+          cat > backend/server.js <<'EOF'
+          import 'dotenv/config';
+          import express from 'express';
+          import cors from 'cors';
+          import fs from 'fs';
+          import path from 'path';
+          import { fileURLToPath } from 'url';
+          import { createDb } from './db.js';
+          import { security } from './middleware/security.js';
+          import releasesRouter from './routes/releases.js';
+          import showsRouter from './routes/shows.js';
+          import merchRouter from './routes/merch.js';
+
+          const __filename = fileURLToPath(import.meta.url);
+          const __dirname = path.dirname(__filename);
+
+          const app = express();
+          app.use(cors());
+          app.use(express.json());
+          security(app);
+
+          const sql = fs.readFileSync(path.join(__dirname,'schema.sql'),'utf8');
+
+          const start = async () => {
+            const db = await createDb();
+            await db.exec(sql);
+            // Seed if empty
+            const count = await db.get('SELECT COUNT(*) as c FROM releases');
+            if (count.c === 0) {
+              const seed = fs.readFileSync(path.join(__dirname,'seed.sql'),'utf8');
+              await db.exec(seed);
+            }
+
+            app.get('/api/health', (req,res)=> res.json({ ok: true }));
+
+            app.use('/api/releases', releasesRouter(db));
+            app.use('/api/shows', showsRouter(db));
+            app.use('/api/merch', merchRouter(db));
+
+            const port = process.env.PORT || 3000;
+            app.listen(port, () => console.log(`API running on :${port}`));
+          };
+
+          start().catch(err=>{ console.error(err); process.exit(1); });
+          EOF
+
+          cat > backend/db.js <<'EOF'
+          import sqlite3 from 'sqlite3';
+          import { open } from 'sqlite';
+
+          export async function createDb() {
+            const db = await open({ filename: './data/app.db', driver: sqlite3.Database });
+            await db.exec('PRAGMA foreign_keys = ON;');
+            return db;
+          }
+          EOF
+
+          cat > backend/schema.sql <<'EOF'
+          CREATE TABLE IF NOT EXISTS releases (
+            id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            cover_url TEXT,
+            release_date TEXT,
+            spotify_url TEXT, apple_url TEXT, youtube_url TEXT, bandcamp_url TEXT,
+            featured INTEGER DEFAULT 0
+          );
+
+          CREATE TABLE IF NOT EXISTS shows (
+            id INTEGER PRIMARY KEY,
+            date TEXT NOT NULL,
+            city TEXT, country TEXT,
+            venue TEXT, festival TEXT,
+            ticket_url TEXT, notify_url TEXT,
+            status TEXT DEFAULT 'upcoming'
+          );
+
+          CREATE TABLE IF NOT EXISTS merch (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            price_cents INTEGER NOT NULL,
+            image_url TEXT,
+            product_url TEXT,
+            available INTEGER DEFAULT 1
+          );
+          EOF
+
+          cat > backend/seed.sql <<'EOF'
+          INSERT INTO releases (title, cover_url, release_date, spotify_url, youtube_url, featured)
+          VALUES
+          ('Astral Drift', 'https://picsum.photos/seed/astral/600/600', '2025-06-01', 'https://open.spotify.com/', 'https://youtube.com/', 1),
+          ('Neon Grove', 'https://picsum.photos/seed/neon/600/600', '2025-04-15', 'https://open.spotify.com/', 'https://youtube.com/', 0);
+
+          INSERT INTO shows (date, city, country, venue, festival, ticket_url, notify_url, status)
+          VALUES
+          ('2025-09-13','Gévezé','France', 'La Flume Enchantée', NULL, 'https://tickets.example.com/1', NULL, 'upcoming'),
+          ('2025-10-03','Philadelphia','USA', 'NOTO Philadelphia', NULL, 'https://tickets.example.com/2', NULL, 'upcoming');
+
+          INSERT INTO merch (name, price_cents, image_url, product_url)
+          VALUES
+          ('Logo Tee', 2500, 'https://picsum.photos/seed/tee/600/600', 'https://store.example.com/tee'),
+          ('Cap', 2000, 'https://picsum.photos/seed/cap/600/600', 'https://store.example.com/cap');
+          EOF
+
+          cat > backend/middleware/security.js <<'EOF'
+          import helmet from 'helmet';
+          import rateLimit from 'express-rate-limit';
+
+          export function security(app) {
+            app.use(helmet({
+              contentSecurityPolicy: {
+                useDefaults: true,
+                directives: {
+                  "img-src": ["'self'", "data:", "https:"],
+                  "media-src": ["'self'", "https:"]
+                }
+              },
+              referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+            }));
+
+            const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300 });
+            app.use(limiter);
+          }
+          EOF
+
+          cat > backend/routes/releases.js <<'EOF'
+          import { Router } from 'express';
+          export default function releasesRouter(db) {
+            const r = Router();
+            r.get('/', async (req,res)=>{
+              const rows = await db.all('SELECT * FROM releases ORDER BY date(release_date) DESC');
+              res.json(rows);
+            });
+            r.get('/featured', async (req,res)=>{
+              const rows = await db.all('SELECT * FROM releases WHERE featured=1 ORDER BY date(release_date) DESC LIMIT 1');
+              res.json(rows);
+            });
+            r.get('/:id', async (req,res)=>{
+              const row = await db.get('SELECT * FROM releases WHERE id=?', req.params.id);
+              if (!row) return res.status(404).json({error:'Not found'});
+              res.json(row);
+            });
+            return r;
+          }
+          EOF
+
+          cat > backend/routes/shows.js <<'EOF'
+          import { Router } from 'express';
+          export default function showsRouter(db) {
+            const r = Router();
+            r.get('/upcoming', async (req,res)=>{
+              const rows = await db.all("SELECT * FROM shows WHERE status='upcoming' ORDER BY date(date) ASC");
+              res.json(rows);
+            });
+            return r;
+          }
+          EOF
+
+          cat > backend/routes/merch.js <<'EOF'
+          import { Router } from 'express';
+          export default function merchRouter(db) {
+            const r = Router();
+            r.get('/', async (req,res)=>{
+              const rows = await db.all('SELECT * FROM merch WHERE available=1 ORDER BY id DESC');
+              res.json(rows);
+            });
+            return r;
+          }
+          EOF
+          cat > backend/.env.example <<'EOF'
+          PORT=3000
+          EOF
+
+          cat > backend/.gitignore <<'EOF'
+          data/
+          EOF
+
+          #############
+          # Frontend snippets (Angular)
+          #############
+
+          cat > frontend-snippets/app/core/services/api.service.ts <<'EOF'
+          import { Injectable, inject } from '@angular/core';
+          import { HttpClient } from '@angular/common/http';
+          import { Observable } from 'rxjs';
+
+          export interface Release { id:number; title:string; cover_url?:string; release_date?:string; spotify_url?:string; apple_url?:string; youtube_url?:string; bandcamp_url?:string; featured?:number; }
+          export interface Show { id:number; date:string; city?:string; country?:string; venue?:string; festival?:string; ticket_url?:string; notify_url?:string; status?:string; }
+          export interface Merch { id:number; name:string; price_cents:number; image_url?:string; product_url?:string; }
+
+          @Injectable({ providedIn: 'root' })
+          export class ApiService {
+            private http = inject(HttpClient);
+            private base = '/api';
+            getReleases(): Observable<Release[]> { return this.http.get<Release[]>(\`\${this.base}/releases\`); }
+            getFeaturedRelease(): Observable<Release[]> { return this.http.get<Release[]>(\`\${this.base}/releases/featured\`); }
+            getUpcomingShows(): Observable<Show[]> { return this.http.get<Show[]>(\`\${this.base}/shows/upcoming\`); }
+            getMerch(): Observable<Merch[]> { return this.http.get<Merch[]>(\`\${this.base}/merch\`); }
+          }
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-card.component.ts <<'EOF'
+          import { Component, Input } from '@angular/core';
+          import { NgIf } from '@angular/common';
+
+          @Component({
+            selector: 'app-release-card',
+            standalone: true,
+            imports: [NgIf],
+            templateUrl: './release-card.component.html',
+            styleUrls: ['./release-card.component.scss']
+          })
+          export class ReleaseCardComponent {
+            @Input() title = '';
+            @Input() cover = '';
+            @Input() spotify?: string;
+            @Input() youtube?: string;
+          }
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-card.component.html <<'EOF'
+          <article class="card">
+            <img [src]="cover" alt="" loading="lazy">
+            <h3>{{ title }}</h3>
+            <div class="cta">
+              <a *ngIf="spotify" [href]="spotify" rel="noopener" class="btn">Listen</a>
+              <a *ngIf="youtube" [href]="youtube" rel="noopener" class="btn ghost">YouTube</a>
+            </div>
+          </article>
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-card.component.scss <<'EOF'
+          @use '../../..//styles/tokens' as *;
+          .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+          img { width: 100%; height: auto; border-radius: calc(var(--radius) - 4px); }
+          .cta { display:flex; gap:8px; margin-top:8px; }
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-grid.component.ts <<'EOF'
+          import { Component, OnInit, inject } from '@angular/core';
+          import { AsyncPipe, NgFor } from '@angular/common';
+          import { ApiService, Release } from '../../core/services/api.service';
+          import { ReleaseCardComponent } from './release-card.component';
+          import { Observable } from 'rxjs';
+
+          @Component({
+            selector: 'app-release-grid',
+            standalone: true,
+            imports: [NgFor, AsyncPipe, ReleaseCardComponent],
+            templateUrl: './release-grid.component.html',
+            styleUrls: ['./release-grid.component.scss']
+          })
+          export class ReleaseGridComponent implements OnInit {
+            private api = inject(ApiService);
+            releases$!: Observable<Release[]>;
+            ngOnInit() { this.releases$ = this.api.getReleases(); }
+          }
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-grid.component.html <<'EOF'
+          <section class="grid">
+            <app-release-card *ngFor="let r of releases$ | async"
+              [title]="r.title" [cover]="r.cover_url || 'assets/placeholder-cover.png'"
+              [spotify]="r.spotify_url" [youtube]="r.youtube_url"></app-release-card>
+          </section>
+          EOF
+
+          cat > frontend-snippets/app/features/music/release-grid.component.scss <<'EOF'
+          .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-card.component.ts <<'EOF'
+          import { Component, Input } from '@angular/core';
+
+          @Component({
+            selector: 'app-tour-card',
+            standalone: true,
+            templateUrl: './tour-card.component.html',
+            styleUrls: ['./tour-card.component.scss']
+          })
+          export class TourCardComponent {
+            @Input() date = '';
+            @Input() city = '';
+            @Input() festival?: string;
+            @Input() venue?: string;
+            @Input() ticketUrl?: string;
+            @Input() notifyUrl?: string;
+          }
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-card.component.html <<'EOF'
+          <article class="tour">
+            <time [attr.datetime]="date">{{ date | date:'MMM d' }}</time>
+            <div class="where">
+              <strong>{{ city }}</strong>
+              <span *ngIf="festival">{{ festival }}</span>
+              <span *ngIf="!festival && venue">{{ venue }}</span>
+            </div>
+            <div class="actions">
+              <a *ngIf="ticketUrl" [href]="ticketUrl" class="btn">Tickets</a>
+              <a *ngIf="notifyUrl" [href]="notifyUrl" class="btn ghost">Notify me</a>
+            </div>
+          </article>
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-card.component.scss <<'EOF'
+          .tour { display:grid; grid-template-columns: 90px 1fr auto; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+          .time { font-weight:600; }
+          .actions { display:flex; gap:8px; }
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-list.component.ts <<'EOF'
+          import { Component, OnInit, inject } from '@angular/core';
+          import { AsyncPipe, NgFor } from '@angular/common';
+          import { ApiService, Show } from '../../core/services/api.service';
+          import { Observable } from 'rxjs';
+          import { TourCardComponent } from './tour-card.component';
+
+          @Component({
+            selector: 'app-tour-list',
+            standalone: true,
+            imports: [NgFor, AsyncPipe, TourCardComponent],
+            templateUrl: './tour-list.component.html',
+            styleUrls: ['./tour-list.component.scss']
+          })
+          export class TourListComponent implements OnInit {
+            private api = inject(ApiService);
+            shows$!: Observable<Show[]>;
+            ngOnInit() { this.shows$ = this.api.getUpcomingShows(); }
+          }
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-list.component.html <<'EOF'
+          <section>
+            <app-tour-card *ngFor="let s of shows$ | async"
+              [date]="s.date" [city]="s.city" [festival]="s.festival" [venue]="s.venue"
+              [ticketUrl]="s.ticket_url" [notifyUrl]="s.notify_url"></app-tour-card>
+          </section>
+          EOF
+
+          cat > frontend-snippets/app/features/tour/tour-list.component.scss <<'EOF'
+          section{display:block;}
+          EOF
+
+          cat > frontend-snippets/styles/_tokens.scss <<'EOF'
+          :root{
+            --bg:#0b0c0e; --surface:#121317; --text:#e7e8ea; --muted:#a6a8ad; --accent:#6ee7b7; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.35);
+          }
+          .btn{ background:var(--accent); color:#0b0c0e; border-radius:10px; padding:8px 12px; text-decoration:none; display:inline-block; }
+          .btn.ghost{ background:transparent; outline:1px solid var(--accent); color:var(--text); }
+          body{ background:var(--bg); color:var(--text); }
+          EOF
+
+          cat > frontend-snippets/INTEGRATION.md <<'EOF'
+          # Integration notes (Angular)
+
+          1) Copy `frontend-snippets/app/core/services/api.service.ts` into your Angular app (e.g., `src/app/core/services`).
+          2) Copy components under `frontend-snippets/app/features/*` into your app and register them in your routes/pages.
+          3) Ensure HttpClientModule is imported in your app root.
+          4) Add the SCSS tokens to global styles:
+             `@use './styles/tokens';` (and copy `_tokens.scss` to `src/styles/_tokens.scss`)
+          5) Use components:
+             - Music grid: `<app-release-grid />`
+             - Tour list: `<app-tour-list />`
+          6) Create `proxy.conf.json` to proxy `/api` → `http://localhost:3000` during dev.
+          EOF
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: feature/r3hab-similar-scaffold
+          commit-message: "feat: scaffold API + Angular components (music grid, tour list, merch)"
+          title: "Scaffold: API + Angular components for music site (R3HAB-style)"
+          body: |
+            This PR adds:
+            - **backend/**: Node/Express + SQLite (releases, shows, merch) with security headers & rate limiting
+            - **frontend-snippets/**: Angular services & components for music grid and tour list
+            - Minimalist dark theme tokens
+
+            Next steps:
+            - Wire components into your Angular app, set dev proxy, and run backend.
+            - Add homepage hero & contact/store pages (I can open a follow-up PR).
