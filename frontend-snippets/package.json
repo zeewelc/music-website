@@ -1,1 +1,1 @@
-{"name": "music-frontend", "version": "1.0.0", "dependencies": {"@angular/core": "^15.0.0"}}
+{"name":"music-frontend","version":"1.0.0","dependencies":{"@angular/core":"^15.0.0"},"devDependencies":{"@angular-devkit/build-angular":"^15.2.11"}}
