@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-black text-white font-sans">
   <header class="relative h-screen flex items-center justify-center bg-black text-center overflow-hidden">
-    <img src="assets/background1.jpg" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-30 animate-fade" />
+    <img src="assets/images/bg.jpg" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-30 animate-fade" />
     <div class="relative z-10 px-4">
       <h1 class="text-5xl md:text-7xl font-extrabold mb-6 animate-slide">Welcome to {{ title }}!</h1>
       <p class="text-xl md:text-2xl text-gray-300 animate-fade">This is the root component of your music website.</p>
@@ -8,7 +8,7 @@
   </header>
 
   <nav class="navbar w-full bg-black bg-opacity-80 px-4 py-4 flex justify-between items-center flex-wrap">
-    <div class="logo text-xl font-bold"> Music Website</div>
+    <div class="logo text-xl font-bold">🎵 Music Website</div>
     <button class="menu-toggle text-white text-2xl" (click)="toggleMenu()">☰</button>
     <div class="nav-links w-full mt-4 sm:w-auto sm:mt-0 flex flex-col sm:flex-row sm:space-x-6" [class.active]="menuOpen">
       <a routerLink="/songs" routerLinkActive="active" class="hover:text-pink-500 transition duration-300">Songs</a>
@@ -33,39 +33,16 @@
       </div>
     </div>
     <div class="flex items-center space-x-4">
-      <select id="trackSelector" onchange="changeTrack()" class="bg-gray-800 text-white px-2 py-1 rounded">
-        <option value="tracka">Track 1</option>
-        <option value="trackb">Track 2</option>
-        <option value="trackc">Track 3</option>
+      <select id="trackSelector" (change)="changeTrack($event)" class="bg-gray-800 text-white px-2 py-1 rounded">
+        <option value="track1">Track 1</option>
+        <option value="track2">Track 2</option>
+        <option value="track3">Track 3</option>
       </select>
       <audio id="audioPlayer" src="assets/sample.mp3"></audio>
       <button onclick="document.getElementById('audioPlayer').play()" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded">Play</button>
-      <button onclick="document.getElemen tById('audioPlayer').pause()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">Pause</button>
+      <button onclick="document.getElementById('audioPlayer').pause()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">Pause</button>
     </div>
   </div>
-
-  <script>
-    function changeTrack() {
-      const selector = document.getElementById('trackSelector');
-      const player = document.getElementById('audioPlayer');
-      const cover = document.getElementById('trackCover');
-      const title = document.getElementById('trackTitle');
-      const artist = document.getElementById('trackArtist');
-
-      const tracks = {
-        tracka: { src: 'assets/sample.mp3', title: 'jg', artist: 'Demo Artist', cover: 'https://r3hab.com/assets/images/track-cover.jpg' },
-        trackb: { src: 'assets/sample2.mp3', title: 'kjhg', artist: 'Demosdsds Artist', cover: 'https://r3hab.com/assets/images/track-cover.jpg' },
-        trackc: { src: 'assets/nospell.mp3', title: 'lkj', artist: 'Demsdsdst', cover: 'https://r3hab.com/assets/images/track-cover.jpg' }
-      };
-
-      const selected = tracks[selector.value];
-      player.src = selected.src;
-      title.textContent = selected.title;
-      artist.textContent = selected.artist;
-      cover.src = selected.cover;
-      player.play();
-    }
-  </script>
 
   <style>
     @keyframes fade {
