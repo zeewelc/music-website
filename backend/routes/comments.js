@@ -3,8 +3,16 @@ const router = express.Router();
 const db = require('../db');
 
 // Test route to confirm it's working
-router.get('/test', (req, res) => {
+router.get('/testThis', (req, res) => {
   res.send('Comments route is working!');
+});
+
+// GET all comments
+router.get('/', (req, res) => {
+  db.all('SELECT * FROM comments', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
 // POST a new comment
