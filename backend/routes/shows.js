@@ -1,10 +1,12 @@
+import express from 'express';
 
-import { Router } from 'express';
 export default function showsRouter(db) {
-  const r = Router();
-  r.get('/upcoming', async (req,res)=>{
-    const rows = await db.all("SELECT * FROM shows WHERE status='upcoming' ORDER BY date(date) ASC");
-    res.json(rows);
+  const router = express.Router();
+
+  router.get('/', async (req, res) => {
+    const shows = await db.all('SELECT * FROM shows');
+    res.json(shows);
   });
-  return r;
+
+  return router;
 }

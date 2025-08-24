@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json());
-security(app);
+// security(app);
 
 const sql = fs.readFileSync(path.join(__dirname,'schema.sql'),'utf8');
 
