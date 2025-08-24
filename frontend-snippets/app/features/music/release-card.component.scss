@@ -1,0 +1,5 @@
+
+@use '../../..//styles/tokens' as *;
+.card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+img { width: 100%; height: auto; border-radius: calc(var(--radius) - 4px); }
+.cta { display:flex; gap:8px; margin-top:8px; }

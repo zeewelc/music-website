@@ -1,0 +1,6 @@
+
+<section class="grid">
+  <app-release-card *ngFor="let r of releases$ | async"
+    [title]="r.title" [cover]="r.cover_url || 'assets/placeholder-cover.png'"
+    [spotify]="r.spotify_url" [youtube]="r.youtube_url"></app-release-card>
+</section>

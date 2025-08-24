@@ -1,0 +1,13 @@
+
+<article class="tour">
+  <time [attr.datetime]="date">{{ date | date:'MMM d' }}</time>
+  <div class="where">
+    <strong>{{ city }}</strong>
+    <span *ngIf="festival">{{ festival }}</span>
+    <span *ngIf="!festival && venue">{{ venue }}</span>
+  </div>
+  <div class="actions">
+    <a *ngIf="ticketUrl" [href]="ticketUrl" class="btn">Tickets</a>
+    <a *ngIf="notifyUrl" [href]="notifyUrl" class="btn ghost">Notify me</a>
+  </div>
+</article>

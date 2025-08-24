@@ -1,0 +1,6 @@
+
+<section>
+  <app-tour-card *ngFor="let s of shows$ | async"
+    [date]="s.date" [city]="s.city" [festival]="s.festival" [venue]="s.venue"
+    [ticketUrl]="s.ticket_url" [notifyUrl]="s.notify_url"></app-tour-card>
+</section>

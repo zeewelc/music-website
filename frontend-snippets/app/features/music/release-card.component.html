@@ -1,0 +1,9 @@
+
+<article class="card">
+  <img [src]="cover" alt="" loading="lazy">
+  <h3>{{ title }}</h3>
+  <div class="cta">
+    <a *ngIf="spotify" [href]="spotify" rel="noopener" class="btn">Listen</a>
+    <a *ngIf="youtube" [href]="youtube" rel="noopener" class="btn ghost">YouTube</a>
+  </div>
+</article>

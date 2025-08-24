@@ -1,0 +1,7 @@
+
+:root{
+  --bg:#0b0c0e; --surface:#121317; --text:#e7e8ea; --muted:#a6a8ad; --accent:#6ee7b7; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.35);
+}
+.btn{ background:var(--accent); color:#0b0c0e; border-radius:10px; padding:8px 12px; text-decoration:none; display:inline-block; }
+.btn.ghost{ background:transparent; outline:1px solid var(--accent); color:var(--text); }
+body{ background:var(--bg); color:var(--text); }
