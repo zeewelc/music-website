@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 export default function showsRouter(db) {
   const r = Router();

@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 export default function merchRouter(db) {
   const r = Router();

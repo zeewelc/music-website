@@ -1,4 +1,3 @@
-
 INSERT INTO releases (title, cover_url, release_date, spotify_url, youtube_url, featured)
 VALUES
 ('Astral Drift', 'https://picsum.photos/seed/astral/600/600', '2025-06-01', 'https://open.spotify.com/', 'https://youtube.com/', 1),

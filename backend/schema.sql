@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS releases (
   id INTEGER PRIMARY KEY,
   title TEXT NOT NULL,

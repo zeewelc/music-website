@@ -1,4 +1,3 @@
-
 import { Component, OnInit, inject } from '@angular/core';
 import { AsyncPipe, NgFor } from '@angular/common';
 import { ApiService, Release } from '../../core/services/api.service';
