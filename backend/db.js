@@ -1,18 +1,14 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import fs from 'fs';
-import path from 'path';
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const fs = require('fs');
 
-export async function createDb() {
-  const dbPath = path.resolve('./data/app.db');
-  const dirPath = path.dirname(dbPath);
-
-  // Ensure the directory exists
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-
-  const db = await open({ filename: dbPath, driver: sqlite3.Database });
-  await db.exec('PRAGMA foreign_keys = ON;');
-  return db;
+// Ensure the database directory exists
+const dbDir = path.join(__dirname, 'db');
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir);
 }
+
+const dbPath = path.join(dbDir, 'music.db');
+const db = new sqlite3.Database(dbPath);
+
+module.exports = db;
