@@ -28,3 +28,16 @@ button:hover {
 .comment-form button {
   padding: 8px 16px;
 }
+
+input, textarea {
+  color: #000; /* Ensure text is visible */
+  background-color: #fff; /* Optional: ensure contrast */
+  font-size: 16px;
+}
+
+.comment-box {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  border-bottom: 1px solid #ccc;
+}
+

@@ -9,7 +9,7 @@ router.get('/testThis', (req, res) => {
 
 // GET all comments
 router.get('/', (req, res) => {
-  db.all('SELECT * FROM comments', [], (err, rows) => {
+  db.all('SELECT * FROM comments ORDER BY timestamp DESC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -20,10 +20,16 @@ router.post('/', (req, res) => {
   const { page, name, text } = req.body;
   if (!page || !name || !text) return res.status(400).json({ error: 'Missing fields' });
 
-  db.run('INSERT INTO comments (page, name, text) VALUES (?, ?, ?)', [page, name, text], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID });
-  });
+  const timestamp = new Date().toISOString();
+
+  db.run(
+    'INSERT INTO comments (page, name, text, timestamp) VALUES (?, ?, ?, ?)',
+    [page, name, text, timestamp],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.status(201).json({ id: this.lastID });
+    }
+  );
 });
 
 // GET comments filtered by page or name
@@ -42,6 +48,8 @@ router.get('/filter', (req, res) => {
     query += ' AND name = ?';
     params.push(name);
   }
+
+  query += ' ORDER BY timestamp DESC';
 
   db.all(query, params, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -79,6 +87,5 @@ router.put('/:id', (req, res) => {
     }
   );
 });
-
 
 module.exports = router;

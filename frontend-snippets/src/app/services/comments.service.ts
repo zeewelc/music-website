@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CommentsService {
-  private apiUrl = 'https://your-backend-url.com/comments'; // Replace with your actual backend URL
+  private apiUrl = 'http://localhost:3000/api/comments'; // Replace with your actual backend URL
 
   constructor(private http: HttpClient) {}
 
@@ -27,7 +27,6 @@ export class CommentsService {
   }
 
   addComment(comment: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}`, comment);
+    return this.http.post(`${this.apiUrl}`, comment);
   }
-
 }

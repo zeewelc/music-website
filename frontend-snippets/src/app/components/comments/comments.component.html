@@ -19,11 +19,21 @@
 <!-- Comment List -->
 <div *ngIf="comments.length > 0; else noComments">
   <div *ngFor="let comment of comments" class="comment-box">
-    <p><strong>{{ comment.name }}</strong>: {{ comment.text }}</p>
+    <p>
+      <strong>{{ comment.name }}</strong>
+      <em style="font-size: 0.8em; color: #666; margin-left: 10px;">
+        {{ comment.timestamp | date:'short' }}
+      </em>
+      : {{ comment.text }}
+    </p>
     <button (click)="deleteComment(comment.id)">Delete</button>
   </div>
 </div>
 
+
 <ng-template #noComments>
   <p>No comments available.</p>
 </ng-template>
+
+
+
