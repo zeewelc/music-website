@@ -1,5 +1,5 @@
 h1 {
-  color: #5a84af;
+  color: #7f6680;
 }
 
 p {
@@ -47,9 +47,15 @@ nav a.active, .nav-links a.active {
 }
 
 .logo {
-  color: #ecf0f1;
-  letter-spacing:3px;
+  .love {
+    color: #ba95bb;
+    font-size: 1.2rem;
+  }
 }
+
+
+
+
 
 .menu-toggle {
   background: none;

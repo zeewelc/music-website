@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 
 export class AppComponent {
-  title = 'music-website';
+  title = 'de music';
   menuOpen = false;
 
   toggleMenu() {
