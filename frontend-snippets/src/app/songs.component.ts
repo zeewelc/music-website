@@ -9,6 +9,6 @@ import { Component } from '@angular/core';
     <!-- Embed the comments component -->
     <app-comments></app-comments>
   `,
-  styles: ['h2 { color: #2c3e50; }']
+  styles: ['h2 { color: #5a84af; }']
 })
 export class SongsComponent { }

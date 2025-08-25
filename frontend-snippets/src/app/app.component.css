@@ -1,5 +1,5 @@
 h1 {
-  color: #2c3e50;
+  color: #5a84af;
 }
 
 p {
@@ -14,7 +14,7 @@ nav, .navbar {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: #2c3e50;
+  background-color: #22394f;
   padding: 10px 20px;
   display: flex;
   gap: 15px;
