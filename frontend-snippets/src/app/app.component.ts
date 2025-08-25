@@ -26,25 +26,25 @@ export class AppComponent {
         src: 'assets/060405.mp3',
         title: '060405',
         artist: 'Jack Denied',
-        cover: 'assets/images/track1-cover.jpg',
+        cover: 'assets/images/track1-cover.png',
       },
       track2: {
         src: 'assets/as then 3.mp3',
         title: 'as then 3',
         artist: 'Jack Denied',
-        cover: 'assets/images/track2-cover.jpg',
+        cover: 'assets/images/track2-cover.png',
       },
       track3: {
         src: 'assets/7-4-3.mp3',
         title: '7-4-3',
         artist: 'Jack Denied',
-        cover: 'assets/images/track3-cover.jpg',
+        cover: 'assets/images/track3-cover.png',
       },
       track4: {
         src: 'assets/12-4-4-pt1.mp3',
         title: '12-4-4-pt1',
         artist: 'Jack Denied',
-        cover: 'assets/images/track4-cover.jpg',
+        cover: 'assets/images/track4-cover.png',
       },
     };
 
