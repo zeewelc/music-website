@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: var(--ff-default);   /* Just Sans → Space Grotesk → NorthBay → system fallbacks */
+  background-color: #f4f4f4;
+  padding-top: 48px;
+}
+
+/* ====== Font Face Declarations ====== */
+/* JUST SANS (default UI font) */
+@font-face {
+  font-family: "Just Sans";
+  src:
+    url("/assets/fonts/just-sans/JUST Sans Regular.woff2") format("woff2"),
+    url("/assets/fonts/just-sans/JUST Sans Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Just Sans";
+  src:
+    url("/assets/fonts/just-sans/JUST Sans ExBold.woff2") format("woff2"),
+    url("/assets/fonts/just-sans/JUST Sans ExBold.woff") format("woff");
+  font-weight: 800; /* ExBold */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* SPACE GROTESK (variable; covers 300–700 if you use the [wght] file) */
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/assets/fonts/space-grotesk/SpaceGrotesk[wght].ttf") format("truetype-variations");
+  font-weight: 300 700; /* adjust if your variable file supports a wider range */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Optional statics as fallback (uncomment if you prefer discrete files)
+@font-face { font-family:"Space Grotesk"; src:url("/assets/fonts/space-grotesk/SpaceGrotesk-Regular.otf") format("opentype"); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:"Space Grotesk"; src:url("/assets/fonts/space-grotesk/SpaceGrotesk-Medium.otf")  format("opentype"); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:"Space Grotesk"; src:url("/assets/fonts/space-grotesk/SpaceGrotesk-SemiBold.otf") format("opentype"); font-weight:600; font-style:normal; font-display:swap; }
+@font-face { font-family:"Space Grotesk"; src:url("/assets/fonts/space-grotesk/SpaceGrotesk-Bold.otf")     format("opentype"); font-weight:700; font-style:normal; font-display:swap; }
+*/
+
+/* NORTHBAY GROTESK (titles/lead) */
+@font-face {
+  font-family: "NorthBay Grotesk";
+  src:
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Regular.ttf") format("truetype"),
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NorthBay Grotesk";
+  src:
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Medium.ttf") format("truetype"),
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NorthBay Grotesk";
+  src:
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-SemiBold.ttf") format("truetype"),
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NorthBay Grotesk";
+  src:
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Bold.ttf") format("truetype"),
+    url("/assets/fonts/northbay-grotesk/NorthBayGrotesk-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ====== Global Defaults ====== */
+:root {
+  --ff-default: "Just Sans", "Space Grotesk", "NorthBay Grotesk",
+                system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  --ff-title: "NorthBay Grotesk", "Just Sans", "Space Grotesk",
+              system-ui, Arial, sans-serif;
+}
+
+html, body {
+  font-family: var(--ff-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Make sure form controls and buttons inherit the default font */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* ====== Lead / Title class (NorthBay Grotesk) ====== */
+/* Keep using your existing variable */
+:root {
+  --ff-title: "NorthBay Grotesk", "Just Sans", "Space Grotesk",
+              system-ui, Arial, sans-serif;
+}
+
+/* Base (your original) */
+.lead-title {
+  font-family: var(--ff-title);
+  font-weight: 700;            /* Bold */
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+/* --- Utility generator for NorthBay Grotesk title classes --- */
+$lead-title-styles: (
+  light:    300,
+  regular:  400,
+  medium:   500,
+  semibold: 600,
+  bold:     700
+);
+
+@mixin lead-title($weight) {
+  font-family: var(--ff-title);
+  font-weight: $weight;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+/* Generate .lead-title-light, .lead-title-regular, ... */
+@each $name, $weight in $lead-title-styles {
+  .lead-title-#{$name} { @include lead-title($weight); }
+}
+
+/* Optional responsive refinements (tweak to taste) */
+@media (max-width: 600px) {
+  .lead-title, 
+  .lead-title-light, 
+  .lead-title-regular, 
+  .lead-title-medium, 
+  .lead-title-semibold, 
+  .lead-title-bold {
+    letter-spacing: 0.015em; /* slightly tighter on small screens */
+  }
+}
+
+
+
+
+
+/* Optional utility classes if you ever want to force a family */
+.font-default { font-family: var(--ff-default); }
+.font-space   { font-family: "Space Grotesk", var(--ff-default); }
+.font-northbay{ font-family: "NorthBay Grotesk", var(--ff-default); }
