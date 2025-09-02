@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Rate limiting middleware to prevent abuse
+const rateLimit = require('express-rate-limit');
+const commentsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
+
+// Apply rate limiting to all comment routes
+router.use(commentsLimiter);
 // Test route to confirm it's working
 router.get('/testThis', (req, res) => {
   res.send('Comments route is working!');
